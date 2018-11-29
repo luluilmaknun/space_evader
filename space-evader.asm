@@ -15,6 +15,7 @@
 ;*
 ;***************************************************************************
 
+.def temp = r16
 
 RESET:                    ;init Stack Pointer
   ldi temp, low(RAMEND)
