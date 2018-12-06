@@ -3,12 +3,12 @@
    <General>
       <Build>2005</Build>
       <Position>
-         <top>52</top>
-         <bottom>423</bottom>
-         <left>52</left>
-         <right>531</right>
+         <top>42</top>
+         <bottom>413</bottom>
+         <left>850</left>
+         <right>1329</right>
       </Position>
-      <StayOnTop>0</StayOnTop>
+      <StayOnTop>1</StayOnTop>
       <Target>ATmega8515</Target>
    </General>
    <Views>
