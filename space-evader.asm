@@ -25,8 +25,21 @@ MAIN:
   rjmp forever
 
 PRINT_BANNER:             ; void PRINT_BANNER()
-  ldi r25, high(2*banner)
-  ldi r24, low(2*banner)
+	cbi PORTA,1	   ; CLR RS
+  ldi temp,0x80	 ; move cursor to line 1 col 0
+	out PORTB,temp
+	sbi PORTA,0	   ; SETB EN
+	cbi PORTA,0	   ; CLR EN  
+  ldi r25, high(2*banner_0)
+  ldi r24, low(2*banner_0)
+  rcall WRITE_TEXT
+  cbi PORTA,1	   ; CLR RS
+  ldi temp,0xc6	 ; move cursor to line 2 col 6
+	out PORTB,temp
+	sbi PORTA,0	   ; SETB EN
+	cbi PORTA,0	   ; CLR EN  
+  ldi r25, high(2*banner_1)
+  ldi r24, low(2*banner_1)
   rcall WRITE_TEXT
   ret
 
@@ -52,13 +65,11 @@ INIT_LCD:
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
 	rcall WAIT_LCD
-	cbi PORTA,1	   ; CLR RS
 	ldi temp,0x0E	 ; MOV DATA,0x0E --> disp ON, cursor ON, blink OFF
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
 	rcall WAIT_LCD
-	cbi PORTA,1	   ; CLR RS
 	ldi temp,0x06  ; MOV DATA,0x06 --> increase cursor, display sroll OFF
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
@@ -134,5 +145,7 @@ WRITE_CHAR:      ; void WRITE_CHAR(char r25)
 forever:
   rjmp forever
 
-banner:
-.db "SPACE INVADER", 0
+banner_0:
+.db ">>>SPACE", 0
+banner_1:
+.db "INVADER<<<", 0
