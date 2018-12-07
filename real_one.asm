@@ -108,3 +108,6 @@ WRITE_TEXT:
  sbi PORTA,0 ; SETB EN
  cbi PORTA,0 ; CLR EN
  ret
+
+OBSTACLE:
+	.db 0xFF, 0x00, 
