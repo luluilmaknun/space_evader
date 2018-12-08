@@ -16,9 +16,14 @@
 ;***************************************************************************
 
 .def temp = r25
+.def position = r18
 
 .org $00
   rjmp RESET
+.org $01
+  rjmp ext_int0
+.org $02
+  rjmp ext_int1
 .org $07
 	rjmp ISR_TOV0
 
@@ -67,7 +72,7 @@ INIT_LCD:
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
 	rcall WAIT_LCD
-	ldi temp,0x0E	 ; MOV DATA,0x0E --> disp ON, cursor ON, blink OFF
+	ldi temp,0x0C	 ; MOV DATA,0x0E --> disp ON, cursor ON, blink OFF
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
@@ -188,7 +193,12 @@ WRITE_CHAR:      ; void WRITE_CHAR(char r25)
 	ret
 
 INIT_INTERRUPT:
-  ldi temp,  (1<<CS01)	; 
+  ldi temp,0b00001010
+  out MCUCR,temp
+  ldi temp,0b11000000
+  out GICR,temp
+  
+  ldi temp, 1<<CS02	; 
   out TCCR0,temp
   ldi temp,1<<TOV0
   out TIFR,temp      ; Interrupt if overflow occurs in T/C0
@@ -205,11 +215,24 @@ INIT_PLAYER:
 	cbi PORTA,0	   ; CLR EN  
   ldi r25, high(2*player)
   ldi r24, low(2*player)
-  rcall WRITE_TEXT
+   rcall WRITE_TEXT
+  ret
+
+PRINT:
+  cbi PORTA,1	   ; CLR RS
+  mov position, temp
+	out PORTB,temp
+	sbi PORTA,0	   ; SETB EN
+	cbi PORTA,0	   ; CLR EN  
+  ldi r25, high(2*player)
+  ldi r24, low(2*player)
+   rcall WRITE_TEXT
   ret
 
 ISR_TOV0:
-  nop
+  rcall CLEAR_LCD
+  rcall DELAY_00
+  rcall PRINT
   reti
 
 MAIN:
@@ -223,6 +246,13 @@ MAIN:
   rcall INIT_PLAYER
   rjmp forever
 
+ext_int0:
+  ldi position,0x80	 ; move cursor to line 1 col 0
+  reti
+
+ext_int1:
+  ldi position,0xC0	 ; move cursor to line 1 col 0
+  reti
 
 forever:
   rjmp forever
@@ -232,4 +262,4 @@ banner_0:
 banner_1:
 .db "INVADER<<<", 0
 player:
-.db "X", 0
+.db ">", 0
