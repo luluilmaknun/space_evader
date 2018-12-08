@@ -55,6 +55,7 @@ RESET:                    ;init Stack Pointer
 
 INIT_IO:
   rcall INIT_LCD
+  rcall INIT_OBSTACLES_MEM
   ;rcall INIT_LED
   ;rcall INIT_BUTTON
   rcall PRINT_BANNER
@@ -197,6 +198,7 @@ INIT_PLAYER:
   ret
 
 ISR_TOV0:
+  rcall SCROLL_OBSTACLES
   rcall UPDATE_OBSTACLE
   rcall DELAY_02
   reti
@@ -222,6 +224,18 @@ INIT_OBSTACLES:
   sts obstacle_pos_l, ZL
   ret
 
+INIT_OBSTACLES_MEM:
+  ldi temp, 0x20
+  ldi r24, space
+  ldi XH, high(obstacles_top_row)
+  ldi XL, low(obstacles_top_row)
+obs_mem_loop:
+  st X+, r24
+  dec temp
+  tst temp
+  brne obs_mem_loop
+  ret
+
 UPDATE_OBSTACLE:
   lds ZH, obstacle_pos_h
   lds ZL, obstacle_pos_l
@@ -241,6 +255,7 @@ skip_top:
   push r24
   rcall WAIT_LCD
   pop r24
+  sts obstacles_top_row_last, r24 ; get the last byte
   rcall WRITE_CHAR
 
   ldi r24, space
@@ -258,6 +273,7 @@ skip_bottom:
   push r24
   rcall WAIT_LCD
   pop r24
+  sts obstacles_bottom_row_last, r24 ; get the last byte
   rcall WRITE_CHAR
   
   sts obstacle_pos_h, ZH
@@ -265,9 +281,56 @@ skip_bottom:
   ret
 
 SCROLL_OBSTACLES:
+  ldi XH, high(obstacles_top_row)
+  ldi XL, low(obstacles_top_row + 0x02)
+  ldi YH, high(obstacles_bottom_row)
+  ldi YL, low(obstacles_bottom_row + 0x02)
+  ldi r24, 0x0e
+  rcall REWRITE_OBSTACLES
   ret
 
-READ_OBSTACLES:
+REWRITE_OBSTACLES:
+  cpi r24, 0x01
+  brne rewrite_again
+  ret
+
+rewrite_again:
+  push r24
+  push r24
+  movw Z, X
+  adiw X, 1
+  ld r23, X
+  st Z, r23
+
+  cbi PORTA,1
+  ldi temp, 0x90
+  sub temp, r24
+  out PORTB, temp
+  sbi PORTA,0
+  cbi PORTA,0
+  rcall WAIT_LCD
+  mov r24, r23
+  rcall WRITE_CHAR
+
+  movw Z, Y
+  adiw Y, 1
+  ld r22, Y
+  st Z, r22
+  pop r24
+
+  cbi PORTA,1
+  ldi temp, 0xd0
+  sub temp, r24
+  out PORTB, temp
+  sbi PORTA,0
+  cbi PORTA,0
+  rcall WAIT_LCD
+  mov r24, r22
+  rcall WRITE_CHAR
+
+  pop r24
+  dec r24
+  rcall REWRITE_OBSTACLES
   ret
 
 forever:
@@ -289,7 +352,19 @@ obstacles:
 .dseg
 
 obstacle_pos_h:
-.db 0
+.byte 1
 
 obstacle_pos_l:
-.db 0
+.byte 1
+
+obstacles_top_row:
+.byte 0x0f
+
+obstacles_top_row_last:
+.byte 1
+
+obstacles_bottom_row:
+.byte 0x0f
+
+obstacles_bottom_row_last:
+.byte 1
