@@ -15,9 +15,6 @@
 ;*
 ;***************************************************************************
 
-.equ space = 0x20
-.equ meteor = 0x40
-.equ width = 0x10
 .def temp = r16
 
 .org $00
@@ -48,7 +45,7 @@ PRINT_BANNER:             ; void PRINT_BANNER()
   ldi r25, high(2*banner_1)
   ldi r24, low(2*banner_1)
   rcall WRITE_TEXT
- ; rcall DELAY_02
+  rcall DELAY_02
   ret
 
 RESET:                    ;init Stack Pointer
@@ -73,17 +70,17 @@ INIT_LCD:
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-;	rcall WAIT_LCD
+	rcall WAIT_LCD
 	ldi temp,0x0C	 ; MOV DATA,0x0E --> disp ON, cursor ON, blink OFF
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-;	rcall WAIT_LCD
+	rcall WAIT_LCD
 	ldi temp,0x06  ; MOV DATA,0x06 --> increase cursor, display sroll OFF
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-;	rcall WAIT_LCD
+	rcall WAIT_LCD
   pop temp
 	ret
 
@@ -162,7 +159,7 @@ CLEAR_LCD:
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-;	rcall WAIT_LCD
+	rcall WAIT_LCD
   pop temp
 	ret
 
@@ -191,7 +188,7 @@ WRITE_CHAR:      ; void WRITE_CHAR(char r25)
 	out PORTB, r25
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-	;rcall WAIT_LCD
+	rcall WAIT_LCD
 	ret
 
 INIT_INTERRUPT:
@@ -230,54 +227,6 @@ PRINT:
    rcall WRITE_TEXT
   ret
 
-INIT_OBSTACLE:
-  	cbi PORTA,1	   ; CLR RS
-  ldi temp,0x80	 ; move cursor to line 1 col 0
-	out PORTB,temp
-	sbi PORTA,0	   ; SETB EN
-	cbi PORTA,0	   ; CLR EN  
-  ldi r25, high(2*obstacle_top)
-  ldi r24, low(2*obstacle_top)
-  rcall WRITE_OBSTACLE
-
-  cbi PORTA,1	   ; CLR RS
-  ldi temp,0xc6	 ; move cursor to line 2 col 6
-	out PORTB,temp
-	sbi PORTA,0	   ; SETB EN
-	cbi PORTA,0	   ; CLR EN  
-  ldi r25, high(2*obstacle_down)
-  ldi r24, low(2*obstacle_down)
-  rcall WRITE_OBSTACLE
-  ret
-
-WRITE_OBSTACLE:         ; void WRITE_TEXT(char[] *r25:24)
-  push r25
-  push r24
-	mov	ZH, r25      ; Load high part of byte address into ZH
-	mov	ZL, r24      ; Load low part of byte address into ZL
-load_obs:
-	lpm			         ; Load byte from program memory into r0
-	
-	mov r25, r0      ; Put the character onto first argument		
-	cpi ZL, 0x10		       ; Check if we've reached the end of the message
-	breq write_quit_obs  ; If so, quit
-
-	rcall WRITE_OBS
-	adiw ZL,1		     ; Increase Z registers
-	rjmp load_obs
-write_quit_obs:
-  pop r24
-  pop r25
-  ret
-
-WRITE_OBS:      ; void WRITE_CHAR(char r25)
-	sbi PORTA,1    ; SETB RS
-	out PORTB, r25
-	sbi PORTA,0	   ; SETB EN
-	cbi PORTA,0	   ; CLR EN
-	;rcall WAIT_LCD
-	ret
-
 ISR_TOV0:
   rcall CLEAR_LCD
   rcall DELAY_00
@@ -291,9 +240,8 @@ MAIN:
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN
-;	rcall WAIT_LCD
+	rcall WAIT_LCD
   rcall INIT_PLAYER
-  rcall INIT_OBSTACLE
   rjmp forever
 
 ext_int0:
@@ -313,8 +261,3 @@ banner_1:
 .db "INVADER<<<", 0
 player:
 .db ">", 0
-obstacle_top:
-.db "@   @ @   @   @ @    @ @    @     @         @@@   @    @    @@@", 0
-obstacle_down: 
-.db "  @     @   @     @@      @    @@    @ @@@      @   @     @ @@@", 0
-
