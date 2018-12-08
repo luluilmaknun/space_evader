@@ -15,7 +15,7 @@
 ;*
 ;***************************************************************************
 
-.def temp = r25
+.def temp = r16
 .def position = r18
 
 .org $00
@@ -220,7 +220,6 @@ INIT_PLAYER:
 
 PRINT:
   cbi PORTA,1	   ; CLR RS
-  mov position, temp
 	out PORTB,temp
 	sbi PORTA,0	   ; SETB EN
 	cbi PORTA,0	   ; CLR EN  
@@ -247,11 +246,11 @@ MAIN:
   rjmp forever
 
 ext_int0:
-  ldi position,0x80	 ; move cursor to line 1 col 0
+  ldi temp,0x80	 ; move cursor to line 1 col 0
   reti
 
 ext_int1:
-  ldi position,0xC0	 ; move cursor to line 1 col 0
+  ldi temp,0xC0	 ; move cursor to line 2 col 0
   reti
 
 forever:
