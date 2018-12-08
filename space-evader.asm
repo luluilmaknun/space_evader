@@ -237,24 +237,24 @@ MAIN:
   rcall INIT_INTERRUPT
   rjmp forever
 
-INIT_OBSTACLES:
-  ldi ZH, high(2*obstacles)
-  sts obstacle_pos_h, ZH
-  ldi ZL, low(2*obstacles)
-  sts obstacle_pos_l, ZL
-  ret
+;INIT_OBSTACLES:
+;  ldi ZH, high(2*obstacles)
+;  sts obstacle_pos_h, ZH
+;  ldi ZL, low(2*obstacles)
+;  sts obstacle_pos_l, ZL
+;  ret
 
-INIT_OBSTACLES_MEM:
-  ldi temp, 0x20
-  ldi r24, space
-  ldi XH, high(obstacles_top_row)
-  ldi XL, low(obstacles_top_row)
-obs_mem_loop:
-  st X+, r24
-  dec temp
-  tst temp
-  brne obs_mem_loop
-  ret
+;INIT_OBSTACLES_MEM:
+;  ldi temp, 0x20
+;  ldi r24, space
+;  ldi XH, high(obstacles_top_row)
+;  ldi XL, low(obstacles_top_row)
+;obs_mem_loop:
+;  st X+, r24
+;  dec temp
+;  tst temp
+;  brne obs_mem_loop
+;  ret
 
 OBSTACLE_BYTE_TO_CHAR_TOP:    ; char OBSTACLE_BYTE_TO_CHAR_TOP(int r24) 
   cpi r24, 1
@@ -316,102 +316,102 @@ next_obstacle_code_bottom:
 
   ret
 
-UPDATE_OBSTACLE:
-  lds ZH, obstacle_pos_h
-  lds ZL, obstacle_pos_l
-  ldi r24, space
-  lpm temp, Z+
-  cpi temp, 0x01
-  brne skip_top
-  ldi r24, meteor   ; only set temp to meteor if lesser
+;UPDATE_OBSTACLE:
+;  lds ZH, obstacle_pos_h
+;  lds ZL, obstacle_pos_l
+;  ldi r24, space
+;  lpm temp, Z+
+;  cpi temp, 0x01
+;  brne skip_top
+;  ldi r24, meteor   ; only set temp to meteor if lesser
+;
+;skip_top:
+;  push temp
+;  cbi PORTA,1        ; CLR RS
+;  ldi temp,0x8f	     ; move cursor to line 1 col 15
+;  out PORTB,temp
+;  sbi PORTA,0	     ; SETB EN
+;  cbi PORTA,0	     ; CLR EN
+;  push r24
+;  rcall WAIT_LCD
+;  pop r24
+;  sts obstacles_top_row_last, r24 ; get the last byte
+;  rcall WRITE_CHAR
+;
+;  ldi r24, space
+;  pop temp
+;  cpi temp, 0x03
+;  brne skip_bottom   ; only set temp to meteor if greater
+;  ldi r24, meteor
+;
+;skip_bottom:
+;  cbi PORTA,1        ; CLR RS
+;  ldi temp,0xcf	     ; move cursor to line 2 col 15
+;  out PORTB,temp
+;  sbi PORTA,0	     ; SETB EN
+;  cbi PORTA,0	     ; CLR EN
+;  push r24
+;  rcall WAIT_LCD
+;  pop r24
+;  sts obstacles_bottom_row_last, r24 ; get the last byte
+;  rcall WRITE_CHAR
+;  
+;  sts obstacle_pos_h, ZH
+;  sts obstacle_pos_l, ZL
+;  ret
 
-skip_top:
-  push temp
-  cbi PORTA,1        ; CLR RS
-  ldi temp,0x8f	     ; move cursor to line 1 col 15
-  out PORTB,temp
-  sbi PORTA,0	     ; SETB EN
-  cbi PORTA,0	     ; CLR EN
-  push r24
-  rcall WAIT_LCD
-  pop r24
-  sts obstacles_top_row_last, r24 ; get the last byte
-  rcall WRITE_CHAR
+;SCROLL_OBSTACLES:
+;  ldi XH, high(obstacles_top_row)
+;  ldi XL, low(obstacles_top_row + 0x02)
+;  ldi YH, high(obstacles_bottom_row)
+;  ldi YL, low(obstacles_bottom_row + 0x02)
+;  ldi r24, 0x0e
+;  rcall REWRITE_OBSTACLES
+;  ret
 
-  ldi r24, space
-  pop temp
-  cpi temp, 0x03
-  brne skip_bottom   ; only set temp to meteor if greater
-  ldi r24, meteor
-
-skip_bottom:
-  cbi PORTA,1        ; CLR RS
-  ldi temp,0xcf	     ; move cursor to line 2 col 15
-  out PORTB,temp
-  sbi PORTA,0	     ; SETB EN
-  cbi PORTA,0	     ; CLR EN
-  push r24
-  rcall WAIT_LCD
-  pop r24
-  sts obstacles_bottom_row_last, r24 ; get the last byte
-  rcall WRITE_CHAR
-  
-  sts obstacle_pos_h, ZH
-  sts obstacle_pos_l, ZL
-  ret
-
-SCROLL_OBSTACLES:
-  ldi XH, high(obstacles_top_row)
-  ldi XL, low(obstacles_top_row + 0x02)
-  ldi YH, high(obstacles_bottom_row)
-  ldi YL, low(obstacles_bottom_row + 0x02)
-  ldi r24, 0x0e
-  rcall REWRITE_OBSTACLES
-  ret
-
-REWRITE_OBSTACLES:
-  cpi r24, 0x01
-  brne rewrite_again
-  ret
-
-rewrite_again:
-  push r24
-  push r24
-  movw Z, X
-  adiw X, 1
-  ld r23, X
-  st Z, r23
-
-  cbi PORTA,1
-  ldi temp, 0x90
-  sub temp, r24
-  out PORTB, temp
-  sbi PORTA,0
-  cbi PORTA,0
-  rcall WAIT_LCD
-  mov r24, r23
-  rcall WRITE_CHAR
-
-  movw Z, Y
-  adiw Y, 1
-  ld r22, Y
-  st Z, r22
-  pop r24
-
-  cbi PORTA,1
-  ldi temp, 0xd0
-  sub temp, r24
-  out PORTB, temp
-  sbi PORTA,0
-  cbi PORTA,0
-  rcall WAIT_LCD
-  mov r24, r22
-  rcall WRITE_CHAR
-
-  pop r24
-  dec r24
-  rcall REWRITE_OBSTACLES
-  ret
+;REWRITE_OBSTACLES:
+;  cpi r24, 0x01
+;  brne rewrite_again
+;  ret
+;
+;rewrite_again:
+;  push r24
+;  push r24
+;  movw Z, X
+;  adiw X, 1
+;  ld r23, X
+;  st Z, r23
+;
+;  cbi PORTA,1
+;  ldi temp, 0x90
+;  sub temp, r24
+;  out PORTB, temp
+;  sbi PORTA,0
+;  cbi PORTA,0
+;  rcall WAIT_LCD
+;  mov r24, r23
+;  rcall WRITE_CHAR
+;
+;  movw Z, Y
+;  adiw Y, 1
+;  ld r22, Y
+;  st Z, r22
+;  pop r24
+;
+;  cbi PORTA,1
+;  ldi temp, 0xd0
+;  sub temp, r24
+;  out PORTB, temp
+;  sbi PORTA,0
+;  cbi PORTA,0
+;  rcall WAIT_LCD
+;  mov r24, r22
+;  rcall WRITE_CHAR
+;
+;  pop r24
+;  dec r24
+;  rcall REWRITE_OBSTACLES
+;  ret
 
 ext_int0:
   ldi temp,0x80	 ; move cursor to line 1 col 0
