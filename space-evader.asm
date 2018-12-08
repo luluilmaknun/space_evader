@@ -195,8 +195,8 @@ INIT_PLAYER:
   ret
 
 ISR_TOV0:
-  rcall SCROLL_OBSTACLES
-  rcall UPDATE_OBSTACLE
+  ;rcall SCROLL_OBSTACLES
+  ;rcall UPDATE_OBSTACLE
   rcall DELAY_02
   reti
 
@@ -208,8 +208,9 @@ MAIN:
   sbi PORTA,0	       ; SETB EN
   cbi PORTA,0	       ; CLR EN
   rcall WAIT_LCD
-  rcall INIT_PLAYER
-  rcall INIT_OBSTACLES
+  rcall PRINT_OBSTACLES
+  ;rcall INIT_PLAYER
+  ;rcall INIT_OBSTACLES
   
   rcall INIT_INTERRUPT
   rjmp forever
@@ -231,6 +232,66 @@ obs_mem_loop:
   dec temp
   tst temp
   brne obs_mem_loop
+  ret
+
+OBSTACLE_BYTE_TO_CHAR_TOP:    ; char OBSTACLE_BYTE_TO_CHAR_TOP(int r24) 
+  cpi r24, 1
+  breq ret_meteor
+  ldi r24, space
+  ret
+
+OBSTACLE_BYTE_TO_CHAR_BOTTOM:    ; char OBSTACLE_BYTE_TO_CHAR_BOTTOM(int r24) 
+  cpi r24, 3
+  breq ret_meteor
+  ldi r24, space
+  ret
+
+ret_meteor:
+  ldi r24, meteor
+  ret
+
+
+PRINT_OBSTACLES:
+  cbi PORTA,1        ; CLR RS
+  ldi temp,0x80	     ; move cursor to line 1 col 0
+  out PORTB,temp
+  sbi PORTA,0	     ; SETB EN
+  cbi PORTA,0	     ; CLR EN
+
+  ldi ZH, high(2*obstacles)
+  ldi ZL, low(2*obstacles)
+  lpm
+
+next_obstacle_code_top:
+  mov r24, r0
+  rcall OBSTACLE_BYTE_TO_CHAR_TOP
+  rcall WRITE_CHAR
+
+  adiw ZL, 1
+  lpm
+  tst r0
+  brne next_obstacle_code_top
+
+  cbi PORTA,1        ; CLR RS
+  ldi temp,0xc0	     ; move cursor to line 2 col 0
+  out PORTB,temp
+  sbi PORTA,0	     ; SETB EN
+  cbi PORTA,0	     ; CLR EN
+
+  ldi ZH, high(2*obstacles)
+  ldi ZL, low(2*obstacles)
+  lpm
+
+next_obstacle_code_bottom:
+  mov r24, r0
+  rcall OBSTACLE_BYTE_TO_CHAR_BOTTOM
+  rcall WRITE_CHAR
+
+  adiw ZL, 1
+  lpm
+  tst r0
+  brne next_obstacle_code_bottom
+
   ret
 
 UPDATE_OBSTACLE:
@@ -342,7 +403,7 @@ player:
 .db "X", 0
 
 obstacles:
-.db 2,2,1,1,2,2,2,3,3,3,3,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,3,3,2,2,1,1,1,1,2,2,3,3,2,2,2,3,2,2,1,1,1,3,3,3,2,2,2,2,1,1,2,2,3,3,2,2,0
+.db 2,2,1,1,2,2,2,3,3,3,3,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,3,3,2,2,1,1,1,1,2,2,3,3,2,2,0
 
 ;******************************** START OF DATA SEGMENT ****************************
 
