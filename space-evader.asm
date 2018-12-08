@@ -195,7 +195,7 @@ INIT_INTERRUPT:
   ret
 
 INIT_PLAYER:
-  ldi temp, -1
+  ldi temp, 0x01
   sts player_pos, temp
   ldi temp, 0x40
   sts player_is_bottom, temp
@@ -203,6 +203,11 @@ INIT_PLAYER:
   ret
 
 UPDATE_PLAYER_POS:
+  ldi temp, 0x18   ; Scroll display one character left (all lines)
+  cbi PORTA,1	   ; CLR RS
+  out PORTB,temp
+  sbi PORTA,0	   ; SETB EN
+  cbi PORTA,0	   ; CLR EN  
   lds temp, player_is_bottom
   ldi r23, 0x80
   add r23, temp
