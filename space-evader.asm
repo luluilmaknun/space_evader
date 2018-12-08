@@ -195,6 +195,8 @@ INIT_INTERRUPT:
   ret
 
 INIT_PLAYER:
+  ldi temp, -1
+  sts player_pos, temp
   ldi temp, 0x40
   sts player_is_bottom, temp
   rcall UPDATE_PLAYER_POS
@@ -204,6 +206,10 @@ UPDATE_PLAYER_POS:
   lds temp, player_is_bottom
   ldi r23, 0x80
   add r23, temp
+  lds temp, player_pos
+  add r23, temp
+  inc temp
+  sts player_pos, temp
   cbi PORTA,1	   ; CLR RS
   out PORTB,r23
   sbi PORTA,0	   ; SETB EN
@@ -444,6 +450,9 @@ obstacles:
 .dseg
 
 player_is_bottom: ; 0x0 for false and 0x40 for true
+.byte 1
+
+player_pos:
 .byte 1
 
 ;obstacle_pos_h:
