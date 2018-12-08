@@ -3,10 +3,10 @@
    <General>
       <Build>2005</Build>
       <Position>
-         <top>114</top>
-         <bottom>485</bottom>
-         <left>610</left>
-         <right>979</right>
+         <top>371</top>
+         <bottom>742</bottom>
+         <left>994</left>
+         <right>1363</right>
       </Position>
       <StayOnTop>1</StayOnTop>
       <Target>ATmega8515</Target>
@@ -55,7 +55,7 @@
             <Name>Up</Name>
             <PortPin>
                <Port>PORTD</Port>
-               <Bit>4</Bit>
+               <Bit>2</Bit>
             </PortPin>
             <Invert>0</Invert>
          </Config>
@@ -63,7 +63,7 @@
             <Name>Down</Name>
             <PortPin>
                <Port>PORTD</Port>
-               <Bit>5</Bit>
+               <Bit>3</Bit>
             </PortPin>
             <Invert>0</Invert>
          </Config>
@@ -71,7 +71,7 @@
             <Name>Pause</Name>
             <PortPin>
                <Port>PORTD</Port>
-               <Bit>6</Bit>
+               <Bit>4</Bit>
             </PortPin>
             <Invert>0</Invert>
          </Config>
@@ -79,7 +79,7 @@
             <Name>Restart</Name>
             <PortPin>
                <Port>PORTD</Port>
-               <Bit>7</Bit>
+               <Bit>5</Bit>
             </PortPin>
             <Invert>0</Invert>
          </Config>
