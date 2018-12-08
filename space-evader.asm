@@ -200,11 +200,6 @@ INIT_PLAYER:
   ret
 
 UPDATE_PLAYER_POS:
-  ldi temp, 0x18   ; Scroll display one character left (all lines)
-  cbi PORTA,1	   ; CLR RS
-  out PORTB,temp
-  sbi PORTA,0	   ; SETB EN
-  cbi PORTA,0	   ; CLR EN  
   lds temp, player_is_bottom
   ldi r23, 0x80
   add r23, temp
@@ -220,8 +215,17 @@ UPDATE_PLAYER_POS:
   rcall WRITE_CHAR
   ret
 
+SCROLL_LCD:
+  ldi temp, 0x18   ; Scroll display one character left (all lines)
+  cbi PORTA,1	   ; CLR RS
+  out PORTB,temp
+  sbi PORTA,0	   ; SETB EN
+  cbi PORTA,0	   ; CLR EN  
+  ret
+
 ISR_TOV0:
   rcall DELAY_02
+  rcall SCROLL_LCD
   rcall UPDATE_PLAYER_POS
   reti
 
