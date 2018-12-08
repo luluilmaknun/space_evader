@@ -206,7 +206,7 @@ ISR_TOV0:
 MAIN:
   rcall CLEAR_LCD
   cbi PORTA,1	       ; CLR RS
-  ldi temp,0xc8        ; MOV DATA,0xc8 --> disp ON, cursor OFF, blink OFF
+  ldi temp,0x0c        ; MOV DATA,0x0c --> disp ON, cursor OFF, blink OFF
   out PORTB,temp
   sbi PORTA,0	       ; SETB EN
   cbi PORTA,0	       ; CLR EN
