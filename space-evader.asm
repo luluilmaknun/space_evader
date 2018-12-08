@@ -18,9 +18,14 @@
 .def temp = r25
 .equ space = 0x20
 .equ meteor = 0x40
+.def position = r18
 
 .org $00
   rjmp RESET
+.org $01
+  rjmp ext_int0
+.org $02
+  rjmp ext_int1
 .org $07
   rjmp ISR_TOV0
 
@@ -174,7 +179,12 @@ WRITE_CHAR:        ; void WRITE_CHAR(char r24)
   ret
 
 INIT_INTERRUPT:
-  ldi temp,(1<<CS01)	; 
+  ldi temp,0b00001010
+  out MCUCR,temp
+  ldi temp,0b11000000
+  out GICR,temp
+  
+  ldi temp, 1<<CS02	; 
   out TCCR0,temp
   ldi temp,1<<TOV0
   out TIFR,temp      ; Interrupt if overflow occurs in T/C0
@@ -191,13 +201,25 @@ INIT_PLAYER:
   cbi PORTA,0	   ; CLR EN  
   ldi r25, high(2*player)
   ldi r24, low(2*player)
-  rcall WRITE_TEXT
+   rcall WRITE_TEXT
+  ret
+
+PRINT:
+  cbi PORTA,1	   ; CLR RS
+	out PORTB,temp
+	sbi PORTA,0	   ; SETB EN
+	cbi PORTA,0	   ; CLR EN  
+  ldi r25, high(2*player)
+  ldi r24, low(2*player)
+   rcall WRITE_TEXT
   ret
 
 ISR_TOV0:
   ;rcall SCROLL_OBSTACLES
   ;rcall UPDATE_OBSTACLE
+  rcall CLEAR_LCD
   rcall DELAY_02
+  rcall PRINT
   reti
 
 MAIN:
@@ -391,6 +413,14 @@ rewrite_again:
   rcall REWRITE_OBSTACLES
   ret
 
+ext_int0:
+  ldi temp,0x80	 ; move cursor to line 1 col 0
+  reti
+
+ext_int1:
+  ldi temp,0xC0	 ; move cursor to line 2 col 0
+  reti
+
 forever:
   rjmp forever
 
@@ -400,7 +430,7 @@ banner_1:
 .db "INVADER<<<", 0
 
 player:
-.db "X", 0
+.db ">", 0
 
 obstacles:
 .db 2,2,1,1,2,2,2,3,3,3,3,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,3,3,2,2,1,1,1,1,2,2,3,3,2,2,0
