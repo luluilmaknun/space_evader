@@ -18,6 +18,7 @@
 .def temp = r25
 .equ space = 0x20
 .equ meteor = 0x40
+.equ player = 0x3e
 .def position = r18
 
 .org $00
@@ -60,7 +61,7 @@ RESET:                    ;init Stack Pointer
 
 INIT_IO:
   rcall INIT_LCD
-  rcall INIT_OBSTACLES_MEM
+  ;rcall INIT_OBSTACLES_MEM
   ;rcall INIT_LED
   ;rcall INIT_BUTTON
   rcall PRINT_BANNER
@@ -194,32 +195,36 @@ INIT_INTERRUPT:
   ret
 
 INIT_PLAYER:
-  cbi PORTA,1	   ; CLR RS
-  ldi temp,0xc0	   ; move cursor to line 2 col 0
-  out PORTB,temp
-  sbi PORTA,0	   ; SETB EN
-  cbi PORTA,0	   ; CLR EN  
-  ldi r25, high(2*player)
-  ldi r24, low(2*player)
-   rcall WRITE_TEXT
+  ldi temp, 0x40
+  sts player_is_bottom, temp
+  rcall UPDATE_PLAYER_POS
   ret
 
-PRINT:
+UPDATE_PLAYER_POS:
+  lds temp, player_is_bottom
+  ldi r23, 0x80
+  add r23, temp
   cbi PORTA,1	   ; CLR RS
-	out PORTB,temp
-	sbi PORTA,0	   ; SETB EN
-	cbi PORTA,0	   ; CLR EN  
-  ldi r25, high(2*player)
-  ldi r24, low(2*player)
-   rcall WRITE_TEXT
+  out PORTB,r23
+  sbi PORTA,0	   ; SETB EN
+  cbi PORTA,0	   ; CLR EN  
+  ldi r24, player
+  rcall WRITE_CHAR
+;  ldi r22, 0x80
+;  sub r22, temp
+;  cbi PORTA,1	   ; CLR RS
+;  out PORTB,r23
+;  sbi PORTA,0	   ; SETB EN
+;  cbi PORTA,0	   ; CLR EN  
+;  ldi r24, space
+;  rcall WRITE_CHAR
   ret
 
 ISR_TOV0:
   ;rcall SCROLL_OBSTACLES
   ;rcall UPDATE_OBSTACLE
-  rcall CLEAR_LCD
   rcall DELAY_02
-  rcall PRINT
+  rcall UPDATE_PLAYER_POS
   reti
 
 MAIN:
@@ -231,7 +236,7 @@ MAIN:
   cbi PORTA,0	       ; CLR EN
   rcall WAIT_LCD
   rcall PRINT_OBSTACLES
-  ;rcall INIT_PLAYER
+  rcall INIT_PLAYER
   ;rcall INIT_OBSTACLES
   
   rcall INIT_INTERRUPT
@@ -414,11 +419,13 @@ next_obstacle_code_bottom:
 ;  ret
 
 ext_int0:
-  ldi temp,0x80	 ; move cursor to line 1 col 0
+  ldi temp, 0             ; false
+  sts player_is_bottom, temp
   reti
 
 ext_int1:
-  ldi temp,0xC0	 ; move cursor to line 2 col 0
+  ldi temp, 0x40          ; true
+  sts player_is_bottom, temp
   reti
 
 forever:
@@ -429,9 +436,6 @@ banner_0:
 banner_1:
 .db "INVADER<<<", 0
 
-player:
-.db ">", 0
-
 obstacles:
 .db 2,2,1,1,2,2,2,3,3,3,3,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,3,3,2,2,1,1,1,1,2,2,3,3,2,2,0
 
@@ -439,20 +443,23 @@ obstacles:
 
 .dseg
 
-obstacle_pos_h:
+player_is_bottom: ; 0x0 for false and 0x40 for true
 .byte 1
 
-obstacle_pos_l:
-.byte 1
-
-obstacles_top_row:
-.byte 0x0f
-
-obstacles_top_row_last:
-.byte 1
-
-obstacles_bottom_row:
-.byte 0x0f
-
-obstacles_bottom_row_last:
-.byte 1
+;obstacle_pos_h:
+;.byte 1
+;
+;obstacle_pos_l:
+;.byte 1
+;
+;obstacles_top_row:
+;.byte 0x0f
+;
+;obstacles_top_row_last:
+;.byte 1
+;
+;obstacles_bottom_row:
+;.byte 0x0f
+;
+;obstacles_bottom_row_last:
+;.byte 1
