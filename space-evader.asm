@@ -192,7 +192,7 @@ INIT_INTERRUPT:
   ret
 
 INIT_PLAYER:
-  ldi temp, 0x01
+  ldi temp, 0x00
   sts player_pos, temp
   ldi temp, 0x40
   sts player_is_bottom, temp
@@ -211,6 +211,7 @@ UPDATE_PLAYER_POS:
   out PORTB,r23
   sbi PORTA,0	   ; SETB EN
   cbi PORTA,0	   ; CLR EN  
+  rcall WAIT_LCD
   ldi r24, player
   rcall WRITE_CHAR
   ret
@@ -221,6 +222,7 @@ SCROLL_LCD:
   out PORTB,temp
   sbi PORTA,0	   ; SETB EN
   cbi PORTA,0	   ; CLR EN  
+  rcall WAIT_LCD
   ret
 
 ISR_TOV0:
