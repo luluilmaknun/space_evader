@@ -335,7 +335,8 @@ coll_three:
   brne coll_passes
 
 collides:
-  nop ; COLLIDES HERE
+  rcall lose_life
+  ret
 
 coll_passes:
   ret
@@ -356,7 +357,7 @@ lose_life:
   lsr life
   out PORTC, life
 
-  cpi life, 0
+  tst life
   breq PRINT_GAMEOVER
   ret
 
