@@ -206,11 +206,19 @@ INIT_PLAYER:
   ret
 
 UPDATE_PLAYER_POS:
+  lds r23, pre_player_cursor
+  cbi PORTA,1	   ; CLR RS
+  out PORTB,r23
+  sbi PORTA,0	   ; SETB EN
+  cbi PORTA,0	   ; CLR EN  
+  ldi r24, space
+  rcall WRITE_CHAR
   lds temp, player_is_bottom
   ldi r23, 0x80
   add r23, temp
   lds temp, player_pos
   add r23, temp
+  sts pre_player_cursor, r23
   inc temp
   sts player_pos, temp
   cbi PORTA,1	   ; CLR RS
@@ -232,7 +240,7 @@ SCROLL_LCD:
   ret
 
 ISR_TOV0:
-  rcall DELAY_02
+  rcall DELAY_00
   rcall CHECK_COLLISION
   rcall SCROLL_LCD
   rcall UPDATE_PLAYER_POS
@@ -391,4 +399,7 @@ player_is_bottom: ; 0x0 for false and 0x40 for true
 .byte 1
 
 player_pos:
+.byte 1
+
+pre_player_cursor:
 .byte 1
