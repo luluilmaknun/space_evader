@@ -68,7 +68,7 @@
             <Invert>0</Invert>
          </Config>
          <Config index="2">
-            <Name>Pause</Name>
+            <Name></Name>
             <PortPin>
                <Port>PORTD</Port>
                <Bit>4</Bit>
@@ -76,7 +76,7 @@
             <Invert>0</Invert>
          </Config>
          <Config index="3">
-            <Name>Restart</Name>
+            <Name></Name>
             <PortPin>
                <Port>PORTD</Port>
                <Bit>5</Bit>
