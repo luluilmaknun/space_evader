@@ -202,7 +202,7 @@ INIT_PLAYER:
   sts player_pos, temp
   ldi temp, 0x40
   sts player_is_bottom, temp
-  rcall UPDATE_PLAYER_POS
+  ;rcall UPDATE_PLAYER_POS
   ret
 
 UPDATE_PLAYER_POS:
@@ -213,21 +213,17 @@ UPDATE_PLAYER_POS:
   cbi PORTA,0	   ; CLR EN  
   ldi r24, space
   rcall WRITE_CHAR
-  lds temp, player_is_bottom
-  ldi r23, 0x80
-  add r23, temp
+
   lds temp, player_pos
-
-  cpi temp, 0x28   ; 40 is max screen size
-  brne no_reset_cursor
-
-  ldi temp, 0
-
-no_reset_cursor:   
-  add r23, temp
-  sts pre_player_cursor, r23
   inc temp
   sts player_pos, temp
+  ldi r23, 0x80
+  add r23, temp
+
+  lds temp, player_is_bottom
+  add r23, temp
+  sts pre_player_cursor, r23
+
   cbi PORTA,1	   ; CLR RS
   out PORTB,r23
   sbi PORTA,0	   ; SETB EN
@@ -331,6 +327,14 @@ next_obstacle_code_bottom:
 
 CHECK_COLLISION:
   lds temp, player_pos
+
+  cpi temp, 0x28   ; 40 is max screen size
+  brne no_reset_cursor
+
+  ldi temp, 0
+  sts player_pos, temp
+
+no_reset_cursor:   
   lds r24, player_is_bottom
   ldi ZH, high(2*obstacles)
   ldi ZL, low(2*obstacles)
