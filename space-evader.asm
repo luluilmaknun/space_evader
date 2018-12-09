@@ -20,6 +20,7 @@
 .equ meteor = 0x40
 .equ player = 0x3e
 .def position = r18
+.def life = r21
 
 .org $00
   rjmp RESET
@@ -191,6 +192,11 @@ INIT_INTERRUPT:
   sei
   ret
 
+INIT_LED:
+  ldi life, 0b11111111
+  out PORTC, life
+  ret
+
 INIT_PLAYER:
   ldi temp, 0x00
   sts player_pos, temp
@@ -240,6 +246,7 @@ MAIN:
   sbi PORTA,0	       ; SETB EN
   cbi PORTA,0	       ; CLR EN
   rcall WAIT_LCD
+  rcall INIT_LED
   rcall PRINT_OBSTACLES
   rcall INIT_PLAYER
   
@@ -333,6 +340,26 @@ collides:
 coll_passes:
   ret
 
+PRINT_GAMEOVER:              ; void PRINT_BANNER()
+  cbi PORTA,1		   ; CLR RS
+  rcall CLEAR_LCD
+  ldi temp,0x80		   ; move cursor to line 1 col 0
+  out PORTB,temp
+  sbi PORTA,0		   ; SETB EN
+  cbi PORTA,0		   ; CLR EN  
+  ldi r25, high(2*game_over)
+  ldi r24, low(2*game_over)
+  rcall WRITE_TEXT
+  rjmp forever
+
+lose_life:
+  lsr life
+  out PORTC, life
+
+  cpi life, 0
+  breq PRINT_GAMEOVER
+  ret
+
 ext_int0:
   ldi temp, 0             ; false
   sts player_is_bottom, temp
@@ -350,7 +377,8 @@ banner_0:
 .db ">>>SPACE", 0
 banner_1:
 .db "INVADER<<<", 0
-
+game_over:
+.db "GAMEOVER!!!", 0
 obstacles:
 .db 2,2,1,1,2,2,2,3,3,3,3,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,3,3,2,2,1,1,1,1,2,2,3,3,2,2,0
 
