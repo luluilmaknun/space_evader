@@ -227,6 +227,7 @@ SCROLL_LCD:
 
 ISR_TOV0:
   rcall DELAY_02
+  rcall CHECK_COLLISION
   rcall SCROLL_LCD
   rcall UPDATE_PLAYER_POS
   reti
@@ -304,6 +305,32 @@ next_obstacle_code_bottom:
   tst r0
   brne next_obstacle_code_bottom
 
+  ret
+
+CHECK_COLLISION:
+  lds temp, player_pos
+  lds r24, player_is_bottom
+  ldi ZH, high(2*obstacles)
+  ldi ZL, low(2*obstacles)
+  add ZL, temp
+  lpm
+  mov temp, r0
+  cpi temp, 2
+  breq coll_passes
+  cpi temp, 1
+  brne coll_three
+  tst r24
+  brne coll_passes
+  rjmp collides
+
+coll_three:
+  cpi r24, 0x40
+  brne coll_passes
+
+collides:
+  nop ; COLLIDES HERE
+
+coll_passes:
   ret
 
 ext_int0:
