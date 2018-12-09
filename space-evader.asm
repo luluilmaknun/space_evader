@@ -217,6 +217,13 @@ UPDATE_PLAYER_POS:
   ldi r23, 0x80
   add r23, temp
   lds temp, player_pos
+
+  cpi temp, 0x28   ; 40 is max screen size
+  brne no_reset_cursor
+
+  ldi temp, 0
+
+no_reset_cursor:   
   add r23, temp
   sts pre_player_cursor, r23
   inc temp
